@@ -1,7 +1,6 @@
 import os
 import subprocess
 import sys
-import random
 from datetime import datetime
 from pathlib import Path
 
@@ -21,6 +20,7 @@ import torchvision.transforms as T
 from tqdm import trange, tqdm
 
 from .clip import load, tokenize
+import secrets
 
 
 # Helpers
@@ -45,14 +45,14 @@ def rand_cutout(image, size, center_bias=False, center_focus=2):
         # sample around image center
         center = max_offset / 2
         std = center / center_focus
-        offset_x = int(random.gauss(mu=center, sigma=std))
-        offset_y = int(random.gauss(mu=center, sigma=std))
+        offset_x = int(secrets.SystemRandom().gauss(mu=center, sigma=std))
+        offset_y = int(secrets.SystemRandom().gauss(mu=center, sigma=std))
         # resample uniformly if over boundaries
-        offset_x = random.randint(min_offset, max_offset) if (offset_x > max_offset or offset_x < min_offset) else offset_x
-        offset_y = random.randint(min_offset, max_offset) if (offset_y > max_offset or offset_y < min_offset) else offset_y
+        offset_x = secrets.SystemRandom().randint(min_offset, max_offset) if (offset_x > max_offset or offset_x < min_offset) else offset_x
+        offset_y = secrets.SystemRandom().randint(min_offset, max_offset) if (offset_y > max_offset or offset_y < min_offset) else offset_y
     else:
-        offset_x = random.randint(min_offset, max_offset)
-        offset_y = random.randint(min_offset, max_offset)
+        offset_x = secrets.SystemRandom().randint(min_offset, max_offset)
+        offset_y = secrets.SystemRandom().randint(min_offset, max_offset)
     cutout = image[:, :, offset_x:offset_x + size, offset_y:offset_y + size]
     return cutout
 
@@ -292,7 +292,7 @@ class Imagine(nn.Module):
             tqdm.write(f'setting seed: {seed}')
             torch.manual_seed(seed)
             torch.cuda.manual_seed(seed)
-            random.seed(seed)
+            secrets.SystemRandom().seed(seed)
             torch.backends.cudnn.deterministic = True
             
         # fields for story creation:
